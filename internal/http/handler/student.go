@@ -67,6 +67,7 @@ func (s Student) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(student)
 }
 
+// nolint: wrapcheck
 func (s Student) Get(c *fiber.Ctx) error {
 	id := c.Params("id", "")
 	if err := validation.Validate(id,
