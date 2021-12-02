@@ -37,7 +37,7 @@ func (m MongoDB) LoadByID(id string) (model.Student, error) {
 func (m MongoDB) Load() ([]model.Student, error) {
 	var students []model.Student
 
-	records, err := m.db.Collection(Collection).Find(context.TODO(), bson.D{})
+	records, err := m.db.Collection(Collection).Find(context.TODO(), bson.M{})
 	if err != nil {
 		return nil, fmt.Errorf("mongo find failed %w", err)
 	}
