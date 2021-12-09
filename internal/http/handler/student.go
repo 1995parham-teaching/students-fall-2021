@@ -19,7 +19,7 @@ type Student struct {
 
 // nolint: wrapcheck
 func (s Student) List(c *fiber.Ctx) error {
-	ss, err := s.Store.Load()
+	ss, err := s.Store.Load(c.Context())
 	if err != nil {
 		log.Printf("cannot load students %s", err)
 
@@ -54,7 +54,7 @@ func (s Student) Create(c *fiber.Ctx) error {
 		Average:     0.0,
 	}
 
-	if err := s.Store.Save(student); err != nil {
+	if err := s.Store.Save(c.Context(), student); err != nil {
 		if errors.Is(err, store.ErrSutdentDuplicate) {
 			return fiber.NewError(http.StatusBadRequest, "student already exists")
 		}
@@ -80,7 +80,7 @@ func (s Student) Get(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	student, err := s.Store.LoadByID(id)
+	student, err := s.Store.LoadByID(c.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrStudentNotFound) {
 			return fiber.ErrNotFound

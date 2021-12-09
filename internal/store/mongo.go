@@ -21,8 +21,8 @@ func NewMongoDBStore(db *mongo.Database) MongoDB {
 	}
 }
 
-func (m MongoDB) Save(s model.Student) error {
-	_, err := m.db.Collection(Collection).InsertOne(context.TODO(), s)
+func (m MongoDB) Save(ctx context.Context, s model.Student) error {
+	_, err := m.db.Collection(Collection).InsertOne(ctx, s)
 	if err != nil {
 		return fmt.Errorf("mongodb insert failed %w", err)
 	}
@@ -30,19 +30,27 @@ func (m MongoDB) Save(s model.Student) error {
 	return nil
 }
 
-func (m MongoDB) LoadByID(id string) (model.Student, error) {
-	return model.Student{}, nil
+func (m MongoDB) LoadByID(ctx context.Context, id string) (model.Student, error) {
+	var student model.Student
+
+	record := m.db.Collection(Collection).FindOne(ctx, bson.M{"id": id})
+
+	if err := record.Decode(&student); err != nil {
+		return model.Student{}, fmt.Errorf("reading from mongodb failed %w", err)
+	}
+
+	return student, nil
 }
 
-func (m MongoDB) Load() ([]model.Student, error) {
+func (m MongoDB) Load(ctx context.Context) ([]model.Student, error) {
 	var students []model.Student
 
-	records, err := m.db.Collection(Collection).Find(context.TODO(), bson.M{})
+	records, err := m.db.Collection(Collection).Find(ctx, bson.M{})
 	if err != nil {
 		return nil, fmt.Errorf("mongo find failed %w", err)
 	}
 
-	for records.Next(context.TODO()) {
+	for records.Next(ctx) {
 		var student model.Student
 
 		if err := records.Decode(&student); err != nil {

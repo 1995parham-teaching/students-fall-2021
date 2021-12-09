@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"errors"
 
 	"githuh.com/cng-by-example/students/internal/model"
@@ -12,7 +13,7 @@ var (
 )
 
 type Student interface {
-	Save(model.Student) error
-	LoadByID(id string) (model.Student, error)
-	Load() ([]model.Student, error)
+	Save(context.Context, model.Student) error
+	LoadByID(context.Context, string) (model.Student, error)
+	Load(context.Context) ([]model.Student, error)
 }
