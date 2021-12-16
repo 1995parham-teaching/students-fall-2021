@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 	"os"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"githuh.com/cng-by-example/students/internal/config"
 	"githuh.com/cng-by-example/students/internal/db"
 	"githuh.com/cng-by-example/students/internal/http/handler"
 	"githuh.com/cng-by-example/students/internal/store"
@@ -22,22 +22,20 @@ func main() {
 		return
 	}
 
+	cfg := config.New()
+
 	switch os.Args[1] {
 	case "server":
-		server()
+		server(cfg)
 	case "migrate":
-		migrate()
+		migrate(cfg)
 	default:
 		log.Println("you must specify a mode between server or migrate")
 	}
 }
 
-func server() {
-	db, err := db.New(db.Config{
-		URL:               "mongodb://127.0.0.1:27017",
-		Name:              "sbu",
-		ConnectionTimeout: 10 * time.Second,
-	})
+func server(cfg config.Config) {
+	db, err := db.New(cfg.Database)
 	if err != nil {
 		log.Fatalf("database connection failed %s", err)
 	}
@@ -55,12 +53,8 @@ func server() {
 	}
 }
 
-func migrate() {
-	db, err := db.New(db.Config{
-		URL:               "mongodb://127.0.0.1:27017",
-		Name:              "sbu",
-		ConnectionTimeout: 10 * time.Second,
-	})
+func migrate(cfg config.Config) {
+	db, err := db.New(cfg.Database)
 	if err != nil {
 		log.Fatalf("database connection failed %s", err)
 	}
