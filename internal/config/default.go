@@ -6,6 +6,7 @@ import (
 	"githuh.com/cng-by-example/students/internal/db"
 )
 
+// nolint: gomnd
 func Default() Config {
 	return Config{
 		Database: db.Config{
