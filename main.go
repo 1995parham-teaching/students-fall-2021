@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -22,23 +23,32 @@ func main() {
 		return
 	}
 
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		log.Println("cannot create a logger")
+
+		return
+	}
+
 	cfg := config.New()
 
 	switch os.Args[1] {
 	case "server":
-		server(cfg)
+		server(cfg, logger.Named("server"))
 	case "migrate":
-		migrate(cfg)
+		migrate(cfg, logger.Named("migrate"))
 	default:
 		log.Println("you must specify a mode between server or migrate")
 	}
 }
 
-func server(cfg config.Config) {
+func server(cfg config.Config, logger *zap.Logger) {
 	db, err := db.New(cfg.Database)
 	if err != nil {
 		log.Fatalf("database connection failed %s", err)
 	}
+
+	logger.Info("database connection successful")
 
 	hs := handler.Student{
 		Store: store.NewMongoDBStore(db),
@@ -53,11 +63,13 @@ func server(cfg config.Config) {
 	}
 }
 
-func migrate(cfg config.Config) {
+func migrate(cfg config.Config, logger *zap.Logger) {
 	db, err := db.New(cfg.Database)
 	if err != nil {
 		log.Fatalf("database connection failed %s", err)
 	}
+
+	logger.Info("database connection successful")
 
 	name, err := db.Collection(store.Collection).Indexes().CreateOne(
 		context.Background(),
